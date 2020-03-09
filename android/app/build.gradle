@@ -143,6 +143,12 @@ android {
         }
     }
     signingConfigs {
+        release {
+            storeFile file('chatea.keystore')
+            storePassword 'chatea'
+            keyAlias 'chatea'
+            keyPassword 'chatea'
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -157,7 +163,8 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -183,6 +190,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
+    implementation project(':react-native-maps')
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-alpha02'
 
