@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, createRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -46,6 +46,8 @@ const Maps = props => {
     headerShown: false,
   });
 
+  const _mapView = createRef();
+
   const onSearchPlace = async destination => {
     const apiURL = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${apiKey}&input=${destination}`;
     try {
@@ -71,6 +73,19 @@ const Maps = props => {
     );
   }, []);
 
+  const goToCurrentCoordinate = () => {
+    if (_mapView.current) {
+      _mapView.current.animateToRegion(
+        {
+          ...currentCoordinate,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.0121,
+        },
+        1500,
+      );
+    }
+  };
+
   useEffect(() => {
     getCurrentPosition();
   }, [getCurrentPosition]);
@@ -93,6 +108,8 @@ const Maps = props => {
           </View>
         </View>
         <MapView
+          ref={_mapView}
+          loadingEnabled={true}
           provider={PROVIDER_GOOGLE}
           style={styles.flex1}
           initialRegion={{
@@ -118,6 +135,7 @@ const Maps = props => {
           reverseColor="dodgerblue"
           color="white"
           raised
+          onPress={() => goToCurrentCoordinate()}
         />
         <Icon
           containerStyle={styles.directionsIcon}
