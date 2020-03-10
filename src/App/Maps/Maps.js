@@ -8,43 +8,43 @@ import {
 import {Text, Input, Icon} from 'react-native-elements';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
 
-// import Geolocation from 'react-native-geolocation-service';
+import Geolocation from 'react-native-geolocation-service';
 
-// async function requestLocationPermission() {
-//   try {
-//     const granted = await PermissionsAndroid.request(
-//       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-//       {
-//         title: 'Location Permission',
-//         message:
-//           'This App needs access to your location ' +
-//           'so we can know where you are.',
-//       },
-//     );
-//     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-//       console.log('You can use locations ');
-//     } else {
-//       console.log('Location permission denied');
-//     }
-//   } catch (err) {
-//     console.warn(err);
-//   }
-// }
+async function requestLocationPermission() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+        title: 'Location Permission',
+        message:
+          'This App needs access to your location ' +
+          'so we can know where you are.',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can use locations ');
+    } else {
+      console.log('Location permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
+const apiKey = 'AIzaSyCey9d3M7d36KkgzBFnNLSXpMzIAbZv-iE';
+
+const defaultCoordinate = {
+  latitude: -7.5591225,
+  longitude: 110.7837924,
+};
 
 const Maps = props => {
   const [searchResult, setSearchResult] = useState([]);
-  const [currentLocation, setCurrentLocation] = useState({});
+  const [currentCoordinate, setCurrentCoordinate] = useState(defaultCoordinate);
   const {navigation} = props;
   navigation.setOptions({
     headerShown: false,
   });
-
-  const defaultCoordinate = {
-    latitude: -7.5591225,
-    longitude: 110.7837924,
-  };
-
-  const apiKey = 'AIzaSyCey9d3M7d36KkgzBFnNLSXpMzIAbZv-iE';
 
   const onSearchPlace = async destination => {
     const apiURL = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${apiKey}&input=${destination}`;
@@ -58,22 +58,26 @@ const Maps = props => {
     }
   };
 
-  // const getCurrentPosition = useCallback(async () => {
-  //   await requestLocationPermission();
-  //   await Geolocation.getCurrentPosition(
-  //     info =>
-  //       setCurrentLocation({
-  //         latitude: info.coords.latitude,
-  //         longitude: info.coords.longitude,
-  //       }),
-  //     error => console.log(error),
-  //     {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-  //   );
-  // }, []);
+  const getCurrentPosition = useCallback(async () => {
+    await requestLocationPermission();
+    await Geolocation.getCurrentPosition(
+      info =>
+        setCurrentCoordinate({
+          latitude: info.coords.latitude,
+          longitude: info.coords.longitude,
+        }),
+      error => console.log(error),
+      {enableHighAccuracy: false, timeout: 20000, maximumAge: 1000},
+    );
+  }, []);
 
-  //  useEffect(() => {
-  //    getCurrentPosition();
-  //  }, [getCurrentPosition]);
+  useEffect(() => {
+    getCurrentPosition();
+  }, [getCurrentPosition]);
+
+  useEffect(() => {
+    console.log(searchResult);
+  });
 
   return (
     <View style={styles.flex1}>
@@ -95,10 +99,15 @@ const Maps = props => {
             ...defaultCoordinate,
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
+          }}
+          region={{
+            ...currentCoordinate,
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.0121,
           }}>
           <MapView.Marker
             title="Current location"
-            coordinate={defaultCoordinate}
+            coordinate={currentCoordinate}
           />
         </MapView>
         <Icon
